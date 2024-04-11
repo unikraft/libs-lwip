@@ -45,6 +45,8 @@
 #include <lwip/priv/sockets_priv.h>
 #include <lwip/api.h>
 #include <lwip/sys.h>
+#include <lwip/tcp.h>
+#include <lwip/tcpbase.h>
 
 
 static inline
@@ -421,16 +423,26 @@ get_lwip_socket_events(struct lwip_sock *sock)
 
 	UK_ASSERT(sock);
 
-	/* A TCP connection may be in not-connected state. Don't report it as
-	 * readable or writeable.
-	 */
-	if ((NETCONNTYPE_GROUP(sock->conn->type) == NETCONN_TCP) &&
-	    (sock->conn->state == NETCONN_NONE) &&
-	    (!NETCONN_RECVMBOX_WAITABLE(sock->conn))) {
-		if (sock->errevent != 0)
-			events |= EPOLLERR;
+	if ((NETCONNTYPE_GROUP(sock->conn->type) == NETCONN_TCP)) {
+		/* A TCP connection may be in not-connected state. Don't report it as
+		 * readable or writeable.
+		 */
+		if ((sock->conn->state == NETCONN_NONE) &&
+		    (!NETCONN_RECVMBOX_WAITABLE(sock->conn))) {
+			if (sock->errevent != 0)
+				events |= EPOLLERR;
 
-		return events;
+			return events;
+		}
+
+                /* Check whether the TCP connection is in CLOSE_WAIT (= got a
+                 * FIN packet). In that case the peer will not sent more data
+                 * and we can tell the application that the receive buffer is
+                 * everything we got until the EOF.
+                 */
+                if (sock->conn->pcb.tcp == NULL ||
+		    sock->conn->pcb.tcp->state == CLOSE_WAIT)
+			events |= EPOLLRDHUP;
 	}
 
 	if (sock->lastdata.pbuf || sock->rcvevent > 0)
