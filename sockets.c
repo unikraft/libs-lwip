@@ -463,7 +463,7 @@ lwip_posix_socket_event_callback(struct lwip_sock *sock,
 }
 
 static void
-lwip_posix_socket_poll(posix_sock *file)
+lwip_posix_socket_poll_setup(posix_sock *file)
 {
 	int lwip_fd;
 	unsigned revents;
@@ -508,7 +508,7 @@ static struct posix_socket_ops lwip_posix_socket_ops = {
 	.write		= lwip_posix_socket_write,
 	.close		= lwip_posix_socket_close,
 	.ioctl		= lwip_posix_socket_ioctl,
-	.poll		= lwip_posix_socket_poll,
+	.poll_setup	= lwip_posix_socket_poll_setup,
 };
 
 POSIX_SOCKET_FAMILY_REGISTER(AF_INET, &lwip_posix_socket_ops);
