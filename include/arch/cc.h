@@ -35,7 +35,7 @@
 #include <uk/plat/lcpu.h>
 #include <uk/print.h>
 #include <uk/assert.h>
-#include <uk/swrand.h>
+#include <uk/random.h>
 #include <errno.h>
 #include <stdarg.h>
 
@@ -59,7 +59,11 @@
 #define ETH_PAD_SIZE 0
 
 /* rand */
-#define LWIP_RAND() uk_swrand_randr()
+#define LWIP_RAND() ({				\
+	__u32 x;				\
+	uk_random_fill_buffer(&x, sizeof(x));	\
+	x;					\
+})
 
 /* compiler hints for packing lwip's structures */
 #define PACK_STRUCT_FIELD(_x)  _x

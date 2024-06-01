@@ -3,7 +3,7 @@ menuconfig LIBLWIP
 	default n
 	select LIBNOLIBC if !HAVE_LIBC
 	select LIBUKDEBUG
-	select LIBUKSWRAND
+	select LIBUKRANDOM
 	select HAVE_NW_STACK
 
 if LIBLWIP
