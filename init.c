@@ -165,7 +165,7 @@ static int liblwip_init(struct uk_init_ctx *ictx __unused)
 	ip4_addr_t *gw4_arg;
 	const char *hostname_arg;
 #if LWIP_DNS
-	ip4_addr_t dns4;
+	ip_addr_t dns;
 	unsigned int nb_dns4 = 0;
 #endif /* LWIP_DNS */
 #endif /* LWIP_IPV4 */
@@ -393,13 +393,18 @@ no_conf:
 		if (nb_dns4 < DNS_MAX_SERVERS) {
 			strcfg = uk_netdev_einfo_get(dev, UK_NETDEV_IPV4_DNS0);
 			if (strcfg) {
-				if (ip4addr_aton(strcfg, &dns4) != 1) {
+#if LWIP_IPV6
+				dns.type = IPADDR_TYPE_V4;
+				if (ip4addr_aton(strcfg, &dns.u_addr.ip4) != 1) {
+#else /* LWIP_IPV6 */
+				if (ip4addr_aton(strcfg, &dns) != 1) {
+#endif /* LWIP_IPV6 */
 					uk_pr_err("Failed to parse DNS server address: %s\n",
 						  strcfg);
 					goto dns_secondary;
 				}
 
-				dns_setserver(nb_dns4++, &dns4);
+				dns_setserver(nb_dns4++, &dns);
 				uk_pr_info("%c%c%u: Primary DNS server: %s\n",
 					   nf->name[0], nf->name[1], nf->num,
 					   strcfg);
@@ -411,13 +416,18 @@ dns_secondary:
 		if (nb_dns4 < DNS_MAX_SERVERS) {
 			strcfg = uk_netdev_einfo_get(dev, UK_NETDEV_IPV4_DNS1);
 			if (strcfg) {
-				if (ip4addr_aton(strcfg, &dns4) != 1) {
+#if LWIP_IPV6
+				dns.type = IPADDR_TYPE_V4;
+				if (ip4addr_aton(strcfg, &dns.u_addr.ip4) != 1) {
+#else /* LWIP_IPV6 */
+				if (ip4addr_aton(strcfg, &dns) != 1) {
+#endif /* LWIP_IPV6 */
 					uk_pr_err("Failed to parse DNS server address: %s\n",
 						  strcfg);
 					goto dns_done;
 				}
 
-				dns_setserver(nb_dns4++, &dns4);
+				dns_setserver(nb_dns4++, &dns);
 				uk_pr_info("%c%c%u: Secondary DNS server: %s\n",
 					   nf->name[0], nf->name[1], nf->num,
 					   strcfg);
