@@ -343,7 +343,7 @@ lwip_posix_socket_sendto(posix_sock *file, const void *buf,
 
 static ssize_t
 lwip_posix_socket_read(posix_sock *file, const struct iovec *iov,
-		       int iovcnt)
+		       size_t iovcnt)
 {
 	int lwip_fd;
 	ssize_t ret;
@@ -360,7 +360,7 @@ lwip_posix_socket_read(posix_sock *file, const struct iovec *iov,
 
 static ssize_t
 lwip_posix_socket_write(posix_sock *file, const struct iovec *iov,
-		       int iovcnt)
+			size_t iovcnt)
 {
 	int lwip_fd;
 	ssize_t ret;
